@@ -1,4 +1,4 @@
-version: '2'
+version: '3.6'
 
 services:
 
@@ -9,11 +9,12 @@ services:
       dockerfile: elasticsearch.dockerfile
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - esdata:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ES_JAVA_OPTS: "-Xmx1g -Xms1g"
     networks:
       - elk
 
@@ -28,9 +29,10 @@ services:
     ports:
       - "5000:5000"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
     networks:
       - elk
+      - app
     depends_on:
       - elasticsearch
 
@@ -48,7 +50,13 @@ services:
     depends_on:
       - elasticsearch
 
-networks:
+volumes:
+  esdata:
+    driver: local
 
+networks:
+  app:
+    external:
+      name: "${APP_NETWORK_NAME}"
   elk:
     driver: bridge
